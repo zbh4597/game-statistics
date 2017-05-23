@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>首页</title>
+    <style>
+        #menu {
+            list-style: none;
+        }
+        
+        #menu li {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <ul id="menu">
+        <li data="user">用户</li>
+        <li data="charge">充值</li>
+    </ul>
+    <div id="container">
+        <div data="user">用户</div>
+        <div data="charge">充值</div>
+    </div>
+    <script src="//cdn.bootcss.com/jquery/3.2.1/jquery.js"></script>
+    <script>
+        $('#container div').hide();
+        $('#menu').delegate('li', 'click', function() {
+            $('#container').trigger('menuchange', $(this).attr('data'));
+            window.location.hash = $(this).attr('data');
+        });
+        $('#container').on('menuchange', function(event, data) {
+            $('#container div').hide();
+            $('#container div[data="' + data + '"]').show();
+        });
+        $(window).on('menuchange', function(event) {
+            $('#container').trigger('menuchange', location.hash.slice(1));
+        });
+    </script>
+</body>
+
+</html>
