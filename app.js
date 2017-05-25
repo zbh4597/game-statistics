@@ -5,7 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var MongoClient = require('mongodb').MongoClient;
-var DB_CONN_STR = 'mongodb://localhost:27017/cq01';
+var DB_CONN_STR = 'mongodb://127.0.0.1:27017/cq01';
 
 var charge = require('./routes/charge');
 var users = require('./routes/users');
@@ -25,6 +25,16 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+//db中间件
+app.use(function(req, res, next) {
+    MongoClient.connect(DB_CONN_STR, function(err, db) {
+        if (err) next(err);
+        console.log('连接成功！');
+        req.db = db;
+        next();
+    });
+});
 
 app.use('/charge', charge);
 app.use('/users', users);
