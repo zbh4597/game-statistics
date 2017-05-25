@@ -6,21 +6,20 @@ var DB_CONN_STR = 'mongodb://127.0.0.1:27017/cq01';
 /* GET users listing. */
 router.get('/:startDate/:endDate', function(req, res, next) {
     var db = req.db;
+    var collection = db.collection('charge');
+
     var startDate = req.params['startDate'];
     var endDate = req.params['endDate'];
     startDate = new Date(startDate);
     endDate = new Date(endDate);
     endDate.setDate(endDate.getDate() + 1); //包含结束日期
+
     var count = startDate.getDate() + 1;
-    var flag = [];
     var result = [];
-    var collection = db.collection('charge');
     var index = 0;
-    var tempDate = null;
     while (startDate.toString() != endDate.toString()) {
-        tempDate = new Date(startDate.getTime());
+        var tempDate = new Date(startDate.getTime());
         tempDate.setDate(tempDate.getDate() + 1);
-        flag.push(false);
         var startDateStr = startDate.toLocaleDateString('zh-CN').replace(/\//g, '-');
         var cursor = collection.aggregate([{
             $match: {
@@ -35,7 +34,6 @@ router.get('/:startDate/:endDate', function(req, res, next) {
             return function(err, doc) {
                 if (err) next(err);
 
-                flag[index] = true;
                 if (doc)
                     result.push({ date: startDateStr, total: doc.total });
                 else
@@ -45,16 +43,8 @@ router.get('/:startDate/:endDate', function(req, res, next) {
         startDate.setDate(count++);
         index++;
     }
-    var startIndex = 0;
     var checkFlag = function() {
-        for (var i = startIndex; i < flag.length; i++) {
-            if (!flag[i]) {
-                startIndex = i;
-                setTimeout(checkFlag, 1000);
-                break;
-            }
-        }
-        if (i == flag.length) {
+        if (result.length === index) {
             result.sort(function(a, b) {
                 if (a.date < b.date)
                     return -1;
@@ -64,6 +54,8 @@ router.get('/:startDate/:endDate', function(req, res, next) {
                     return 0;
             });
             res.json(result);
+        } else {
+            setTimeout(checkFlag, 1000);
         }
     }
     setTimeout(checkFlag, 1000);
