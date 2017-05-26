@@ -1,86 +1,80 @@
 <!doctype html>
-<html>
 
-<head>
-    <meta charset="utf-8">
-    <title>首页</title>
-    <link rel="stylesheet" href="stylesheets/jquery-ui.css">
-    <style>
-        .hidden {
-            display: none;
-        }
-        
-        #menu {
-            list-style: none;
-        }
-        
-        #menu li {
-            cursor: pointer;
-        }
-    </style>
-</head>
+<meta charset="utf-8">
+<title>首页</title>
+<link rel="stylesheet" href="stylesheets/jquery-ui.css">
+<style>
+    .hidden {
+        display: none;
+    }
+    
+    #menu {
+        list-style: none;
+    }
+    
+    #menu li {
+        cursor: pointer;
+    }
+</style>
+<select id="type">
+    <option value="charge.totalAmount">日总充值金额</option>
+    <!--<option value="agent">指定平台充值额</option>-->
+    <option value="charge.unfinishOrder">未完成订单数</option>
+    <option value="charge.playerNum">充值人数（按角色去除重复）</option>
+    <option value="charge.times">充值次数</option>
+    <option value="charge.firstNum">首充人数</option>
+    <option value="users.newAdd">日新增用户数</option>
+    <option value="users.saved">用户留存</option>
+</select>
+<p>Date: <input type="text" id="datepicker"></p>
+<div style="width:400px;height:400px">
+    <canvas id="myChart" width="400" height="400"></canvas>
+</div>
+<script src="javascripts/jquery.js"></script>
+<script src="javascripts/jquery-ui.js"></script>
+<script src="javascripts/date.js"></script>
+<script src="javascripts/Chart.js"></script>
+<script>
+    var ctx = document.getElementById("myChart").getContext("2d");
+    mydate.select("#datepicker", function(begin, end) {
+        fetchData(begin, end);
+    });
 
-<body>
-    <!--<ul id="menu">
-        <li data="user">用户</li>
-        <li data="charge">充值</li>
-    </ul>
-    <div id="container">
-        <div class="hidden" data="user">用户</div>
-        <div class="hidden" data="charge">充值</div>
-    </div>-->
-    <p>Date: <input type="text" id="datepicker"></p>
-    <div style="width:400px;height:400px">
-        <canvas id="myChart" width="400" height="400"></canvas>
-    </div>
-    <!--<script src="javascripts/jquery-3.2.1.js"></script>-->
-    <script src="javascripts/jquery.js"></script>
-    <script src="javascripts/jquery-ui.js"></script>
-    <script src="javascripts/date.js"></script>
-    <script src="javascripts/Chart.js"></script>
-    <script>
-        var ctx = document.getElementById("myChart").getContext("2d");
-        mydate.select("#datepicker", function(begin, end) {
-            fetchData(begin, end);
-        });
-
-        function fetchData(begin, end) {
-            $.get('charge/totalAmount/' + begin + '/' + end, {}, function(data) {
-                var title = data.title;
-                var data = {
-                    labels: data.labels,
-                    datasets: [{
-                        label: title,
-                        fillColor: "rgba(220,220,220,0.5)",
-                        strokeColor: "rgba(220,220,220,1)",
-                        pointColor: "rgba(220,220,220,1)",
-                        pointStrokeColor: "#fff",
-                        data: data.data
-                    }]
-                }
-                var config = {
-                    type: 'line',
-                    data: data,
-                    options: {
-                        responsive: true,
-                        title: {
-                            display: true,
-                            text: title
-                        },
-                        scales: {
-                            xAxes: [{
-                                display: true
-                            }],
-                            yAxes: [{
-                                display: true
-                            }]
-                        }
+    function fetchData(begin, end) {
+        var url = $('#type').val().replace('.', '/') + '/';
+        $.get(url + begin + '/' + end, {}, function(data) {
+            var title = data.title;
+            var data = {
+                labels: data.labels,
+                datasets: [{
+                    label: title,
+                    fillColor: "rgba(220,220,220,0.5)",
+                    strokeColor: "rgba(220,220,220,1)",
+                    pointColor: "rgba(220,220,220,1)",
+                    pointStrokeColor: "#fff",
+                    data: data.data
+                }]
+            }
+            var config = {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    title: {
+                        display: true,
+                        text: title
+                    },
+                    scales: {
+                        xAxes: [{
+                            display: true
+                        }],
+                        yAxes: [{
+                            display: true
+                        }]
                     }
-                };
-                new Chart(ctx, config);
-            });
-        }
-    </script>
-</body>
-
-</html>
+                }
+            };
+            new Chart(ctx, config);
+        });
+    }
+</script>
