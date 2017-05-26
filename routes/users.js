@@ -1,64 +1,45 @@
 var express = require('express');
 var router = express.Router();
-var MongoClient = require('mongodb').MongoClient;
-var DB_CONN_STR = 'mongodb://127.0.0.1:27017/cq01';
+var utils = require('../utils');
+var COLLECTION = 'user';
 
-/* GET users listing. */
-router.get('/:startDate/:endDate', function(req, res, next) {
-    var db = req.db;
-    var collection = db.collection('charge');
+router.get('/newAdd/:startDate/:endDate', function(req, res, next) {
+    var title = '日新增用户数';
 
-    var startDate = req.params['startDate'];
-    var endDate = req.params['endDate'];
-    startDate = new Date(startDate);
-    endDate = new Date(endDate);
-    endDate.setDate(endDate.getDate() + 1); //包含结束日期
+    utils.doFetch(req, res, next, title, COLLECTION, function(startDateStr, tempDateStr) {
+        return [{
+                $match: {
+                    $and: [
+                        { registerTime: { $gte: startDateStr } },
+                        { registerTime: { $lt: tempDateStr } }
+                    ]
+                }
+            },
+            { $count: "total" }
+        ];
+    });
+});
 
-    var count = startDate.getDate() + 1;
-    var result = [];
-    var index = 0;
-    while (startDate.toString() != endDate.toString()) {
-        var tempDate = new Date(startDate.getTime());
-        tempDate.setDate(tempDate.getDate() + 1);
-        var startDateStr = startDate.toLocaleDateString('zh-CN').replace(/\//g, '-');
-        var cursor = collection.aggregate([{
-            $match: {
-                $and: [
-                    { state: 1 },
-                    { time: { $gte: startDateStr } },
-                    { time: { $lt: tempDate.toLocaleDateString('zh-CN').replace(/\//g, '-') } }
-                ]
-            }
-        }, { $group: { _id: "", total: { $sum: "$yuan" } } }]);
-        cursor.next((function(index, startDateStr) {
-            return function(err, doc) {
-                if (err) next(err);
+router.get('/saved/:startDate/:endDate', function(req, res, next) {
+    var title = '用户留存';
 
-                if (doc)
-                    result.push({ date: startDateStr, total: doc.total });
-                else
-                    result.push({ date: startDateStr, total: 0 });
-            };
-        })(index, startDateStr));
-        startDate.setDate(count++);
-        index++;
-    }
-    var checkFlag = function() {
-        if (result.length === index) {
-            result.sort(function(a, b) {
-                if (a.date < b.date)
-                    return -1;
-                else if (a.date > b.date)
-                    return 1;
-                else
-                    return 0;
-            });
-            res.json(result);
-        } else {
-            setTimeout(checkFlag, 1000);
-        }
-    }
-    setTimeout(checkFlag, 1000);
+    utils.doFetch(req, res, next, title, COLLECTION, function(startDateStr, tempDateStr) {
+        var startDate = new Date(startDateStr);
+        startDate.setDate(startDate.getDate() - 1);
+        var lastDateOfStartStr = startDate.toLocaleDateString('zh-CN').replace(/\//g, '-');
+        return [{
+                $match: {
+                    $and: [
+                        { registerTime: { $gte: lastDateOfStartStr } },
+                        { registerTime: { $lt: startDateStr } },
+                        { lastTime: { $gte: startDateStr } },
+                        { lastTime: { $lt: tempDateStr } }
+                    ]
+                }
+            },
+            { $count: "total" }
+        ];
+    });
 });
 
 module.exports = router;
