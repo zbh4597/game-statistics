@@ -10,6 +10,7 @@ var DB_CONN_STR = config.url;
 
 var charge = require('./routes/charge');
 var users = require('./routes/users');
+var users = require('./routes/common');
 
 var app = express();
 
@@ -39,6 +40,7 @@ app.use(function(req, res, next) {
 
 app.use('/charge', charge);
 app.use('/users', users);
+app.use('/common', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

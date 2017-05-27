@@ -16,15 +16,8 @@
         cursor: pointer;
     }
 </style>
-<select id="type">
-    <option value="charge.totalAmount">日总充值金额</option>
-    <!--<option value="agent">指定平台充值额</option>-->
-    <option value="charge.unfinishOrder">未完成订单数</option>
-    <option value="charge.playerNum">充值人数（按角色去除重复）</option>
-    <option value="charge.times">充值次数</option>
-    <option value="charge.firstNum">首充人数</option>
-    <option value="users.newAdd">日新增用户数</option>
-    <option value="users.saved">用户留存</option>
+<select id="functionList">
+    <option value="">请选择</option>
 </select>
 <p>Date: <input type="text" id="datepicker"></p>
 <div style="width:800px;height:400px">
@@ -35,14 +28,30 @@
 <script src="javascripts/date.js"></script>
 <script src="javascripts/Chart.js"></script>
 <script>
+    var currentBegin, currentEnd;
+    $.get('common/functionList', {}, function(data) {
+        for (var i = 0; i < data.length; i++) {
+            var aData = data[i];
+            $('<option>').attr('value', aData.value).text(aData.label).appendTo('#functionList');
+        }
+    });
+
     var ctx = document.getElementById("myChart").getContext("2d");
     mydate.select("#datepicker", function(begin, end) {
+        currentBegin = begin;
+        currentEnd = end;
         fetchData(begin, end);
+    });
+    $('#functionList').on('change', function(event) {
+        fetchData(currentBegin, currentEnd);
     });
 
     function fetchData(begin, end) {
-        var url = $('#type').val().replace('.', '/') + '/';
+        var url = $('#functionList').val();
+        if (!url || !begin || !end) return; //TODO 获取开服时间，作为最小begin，或者1个月前为默认end。当前时间作为最大和默认end。
+
         $.get(url + begin + '/' + end, {}, function(data) {
+            console.log(data);
             var title = data.title;
             var data = {
                 labels: data.labels,
