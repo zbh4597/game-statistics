@@ -7,17 +7,14 @@ function doFetch(req, res, next, title, collection, aggregation) {
     var endDate = req.params['endDate'];
     startDate = new Date(startDate);
     endDate = new Date(endDate);
-    endDate.setDate(endDate.getDate() + 1); //包含结束日期
 
-    var count = startDate.getDate() + 1;
     var result = [];
 
     var index = 0;
-    while (startDate.toString() != endDate.toString()) {
-        var tempDate = new Date(startDate.getTime());
-        tempDate.setDate(tempDate.getDate() + 1);
+    while (startDate <= endDate) {
         var startDateStr = startDate.toLocaleDateString('zh-CN').replace(/\//g, '-');
-        var tempDateStr = tempDate.toLocaleDateString('zh-CN').replace(/\//g, '-');
+        startDate.setDate(startDate.getDate() + 1);
+        var tempDateStr = startDate.toLocaleDateString('zh-CN').replace(/\//g, '-');
 
         var cursor = collection.aggregate((function(startDateStr, tempDateStr) {
             return aggregation(startDateStr, tempDateStr);
@@ -33,7 +30,6 @@ function doFetch(req, res, next, title, collection, aggregation) {
                     result.push({ date: startDateStr, total: 0 });
             };
         })(index, startDateStr));
-        startDate.setDate(count++);
         index++;
     }
 
