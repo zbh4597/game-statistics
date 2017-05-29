@@ -42,4 +42,11 @@ router.get('/saved/:startDate/:endDate', function(req, res, next) {
     });
 });
 
+router.get('/playerInfo', function(req, res, next) {
+    var title = '玩家信息';
+
+    var db = req.db;
+    var playerInfo = req.collection('playerInfo');
+});
+
 module.exports = router;

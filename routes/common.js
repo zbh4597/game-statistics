@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var utils = require('../utils');
 
 router.get('/functionList', function(req, res, next) {
     res.json([{
@@ -30,4 +31,13 @@ router.get('/functionList', function(req, res, next) {
     // }TODO 需要进一步处理
 });
 
+//获取开服日期
+router.get('/severStartTime', function(req, res, next) {
+    var db = req.db;
+    var collection = db.collection('gameConfig');
+    collection.findOne({}, {}, function(err, doc) {
+        if (err) next(err);
+        res.json({ serverStartTime: utils.formatDate(new Date(doc.severStartTime)) });
+    });
+});
 module.exports = router;

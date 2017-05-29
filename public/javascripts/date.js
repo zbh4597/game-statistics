@@ -92,6 +92,8 @@
         });
     }
 
+
+
     var mydate = {};
     mydate.select = function(elem, callback) {
         datePickerById(elem, callback);

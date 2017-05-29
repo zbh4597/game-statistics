@@ -1,3 +1,8 @@
+function formatDate(date) {
+    if (!date instanceof Date) return;
+    return date.toLocaleDateString('zh-CN').replace(/\//g, '-');
+}
+
 function doFetch(req, res, next, title, collection, aggregation) {
 
     var db = req.db;
@@ -12,9 +17,9 @@ function doFetch(req, res, next, title, collection, aggregation) {
 
     var index = 0;
     while (startDate <= endDate) {
-        var startDateStr = startDate.toLocaleDateString('zh-CN').replace(/\//g, '-');
+        var startDateStr = formatDate(startDate);
         startDate.setDate(startDate.getDate() + 1);
-        var tempDateStr = startDate.toLocaleDateString('zh-CN').replace(/\//g, '-');
+        var tempDateStr = formatDate(startDate);
 
         var cursor = collection.aggregate((function(startDateStr, tempDateStr) {
             return aggregation(startDateStr, tempDateStr);
@@ -60,6 +65,8 @@ function doFetch(req, res, next, title, collection, aggregation) {
     setTimeout(checkFlag, 1000);
 }
 
+
 module.exports = {
-    doFetch: doFetch
+    doFetch: doFetch,
+    formatDate: formatDate
 };

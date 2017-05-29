@@ -4,23 +4,43 @@
 <title>首页</title>
 <link rel="stylesheet" href="stylesheets/jquery-ui.css">
 <style>
-    .hidden {
-        display: none;
+    * {
+        margin: 0;
+        padding: 0;
     }
     
-    #menu {
+    #functionList {
         list-style: none;
+        padding: 5px;
     }
     
-    #menu li {
+    #functionList li {
         cursor: pointer;
+        float: left;
+        padding: 5px;
+    }
+    
+    .clear {
+        clear: both;
+    }
+    
+    .selected {
+        background: #ccc;
+    }
+    
+    #date {
+        padding: 10px;
     }
 </style>
-<select id="functionList">
-    <option value="">请选择</option>
-</select>
-<p>Date: <input type="text" id="datepicker"></p>
-<div style="width:800px;height:400px">
+<div style="padding:10px;">
+    <a href="playerInfo.html" target="_blank">玩家信息</a>
+</div>
+<ul id="functionList">
+
+</ul>
+<div class="clear"></div>
+<div id="date">Date: <input type="text" id="datepicker"></div>
+<div style="width:1000px;height:500px">
     <canvas id="myChart" width="400" height="400"></canvas>
 </div>
 <script src="javascripts/jquery.js"></script>
@@ -28,11 +48,21 @@
 <script src="javascripts/date.js"></script>
 <script src="javascripts/Chart.js"></script>
 <script>
-    var currentBegin, currentEnd;
+    var currentUrl, currentBegin, currentEnd;
+
+    //默认日期
+    $.get('common/severStartTime', {}, function(data) {
+        console.log(data);
+        serverStartTime = data.serverStartTime;
+        currentBegin = serverStartTime;
+    });
+    currentEnd = new Date().toLocaleDateString('zh-CN').replace(/\//g, '-');
+
     $.get('common/functionList', {}, function(data) {
+        console.log(data);
         for (var i = 0; i < data.length; i++) {
             var aData = data[i];
-            $('<option>').attr('value', aData.value).text(aData.label).appendTo('#functionList');
+            $('<li>').attr('data-url', aData.value).text(aData.label).appendTo('#functionList');
         }
     });
 
@@ -40,14 +70,16 @@
     mydate.select("#datepicker", function(begin, end) {
         currentBegin = begin;
         currentEnd = end;
-        fetchData(begin, end);
+        fetchData(ctx, currentUrl, currentBegin, currentEnd);
     });
-    $('#functionList').on('change', function(event) {
-        fetchData(currentBegin, currentEnd);
+    $('#functionList').delegate('li', 'click', function(event) {
+        $('#functionList li').removeClass('selected');
+        $(this).addClass('selected');
+        currentUrl = $(this).attr('data-url');
+        fetchData(ctx, currentUrl, currentBegin, currentEnd);
     });
 
-    function fetchData(begin, end) {
-        var url = $('#functionList').val();
+    function fetchData(ctx, url, begin, end) {
         if (!url || !begin || !end) return; //TODO 获取开服时间，作为最小begin，或者1个月前为默认end。当前时间作为最大和默认end。
 
         $.get(url + begin + '/' + end, {}, function(data) {
