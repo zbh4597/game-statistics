@@ -31,17 +31,26 @@
     #date {
         padding: 10px;
     }
+    
+    #datepicker {
+        margin-right: 10px;
+    }
 </style>
-<div style="padding:10px;">
-    <a href="playerInfo.html" target="_blank">玩家信息</a>
-</div>
 <ul id="functionList">
 
 </ul>
 <div class="clear"></div>
-<div id="date">Date: <input type="text" id="datepicker"></div>
-<div style="width:1000px;height:500px">
-    <canvas id="myChart" width="400" height="400"></canvas>
+<div id="date">
+    Date: <input type="text" id="datepicker">
+    <a href="javascript:;" class="today">今日</a>
+    <a href="javascript:;" class="yestoday">昨日</a>
+    <a href="javascript:;" class="last7">近7日</a>
+    <a href="javascript:;" class="last30">近30日</a>
+    <a href="javascript:;" class="all">全部</a>
+    <a href="playerInfo.html" target="_blank">玩家信息</a>
+</div>
+<div style="width:600px;height:300px">
+    <canvas id="myChart" width="300" height="300"></canvas>
 </div>
 <script src="javascripts/jquery.js"></script>
 <script src="javascripts/jquery-ui.js"></script>
@@ -49,19 +58,43 @@
 <script src="javascripts/Chart.js"></script>
 <script>
     var currentUrl, currentBegin, currentEnd, serverStartTime;
+    var ctx = document.getElementById("myChart").getContext("2d");
 
-    //默认日期
-    $.get('common/severStartTime', {}, function(data) {
-        console.log(data);
-        serverStartTime = data.serverStartTime;
-        // currentBegin = serverStartTime;
+    $('#date').delegate('a', 'click', function(event) {
+        var type = $(this).attr('class');
+        switch (type) {
+            case 'today':
+                var today = new Date();
+                currentBegin = currentEnd = formatDate(today);
+                break;
+            case 'yestoday':
+                var today = new Date();
+                currentEnd = formatDate(today);
+                today.setDate(today.getDate() - 1);
+                currentBegin = formatDate(today);
+                break;
+            case 'last7':
+                var today = new Date();
+                currentEnd = formatDate(today);
+                today.setDate(today.getDate() - 7);
+                currentBegin = formatDate(today);
+                break;
+            case 'last30':
+                var today = new Date();
+                currentEnd = formatDate(today);
+                today.setDate(today.getDate() - 30);
+                currentBegin = formatDate(today);
+                break;
+            case 'all':
+                currentBegin = serverStartTime;
+                var today = new Date();
+                currentEnd = formatDate(today);
+                break;
+            default:
+                break;
+        }
+        fetchData(ctx, currentUrl, currentBegin, currentEnd);
     });
-
-    //默认取一周数据
-    var today = new Date();
-    currentEnd = today.toLocaleDateString('zh-CN').replace(/\//g, '-');
-    today.setDate(today.getDate() - 7);
-    currentBegin = today.toLocaleDateString('zh-CN').replace(/\//g, '-');
 
     $.get('common/functionList', {}, function(data) {
         console.log(data);
@@ -69,9 +102,12 @@
             var aData = data[i];
             $('<li>').attr('data-url', aData.value).text(aData.label).appendTo('#functionList');
         }
+
+        currentUrl = 'charge/totalAmount/';
+        $('#functionList').find('li[data-url="' + currentUrl + '"]').addClass('selected');
+        fetchData(ctx, currentUrl, currentBegin, currentEnd);
     });
 
-    var ctx = document.getElementById("myChart").getContext("2d");
     mydate.select("#datepicker", function(begin, end) {
         currentBegin = begin;
         currentEnd = end;
@@ -123,4 +159,18 @@
             new Chart(ctx, config);
         });
     }
+
+    function formatDate(date) {
+        if (!date instanceof Date) return;
+        return date.toLocaleDateString('zh-CN').replace(/\//g, '-');
+    }
+
+    //默认日期
+    $.get('common/severStartTime', {}, function(data) {
+        console.log(data);
+        serverStartTime = data.serverStartTime;
+        // currentBegin = serverStartTime;
+        //默认取一周数据
+        $('#date a.last7').click();
+    });
 </script>
