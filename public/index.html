@@ -42,11 +42,11 @@
 <div class="clear"></div>
 <div id="date">
     Date: <input type="text" id="datepicker">
-    <a href="javascript:;" class="today">今日</a>
-    <a href="javascript:;" class="yestoday">昨日</a>
-    <a href="javascript:;" class="last7">近7日</a>
-    <a href="javascript:;" class="last30">近30日</a>
-    <a href="javascript:;" class="all">全部</a>
+    <a href="javascript:;" data="today">今日</a>
+    <a href="javascript:;" data="yestoday">昨日</a>
+    <a href="javascript:;" data="last7">近7日</a>
+    <a href="javascript:;" data="last30">近30日</a>
+    <a href="javascript:;" data="all">全部</a>
     <a href="playerInfo.html" target="_blank">玩家信息</a>
 </div>
 <div style="width:600px;height:300px">
@@ -58,10 +58,14 @@
 <script src="javascripts/Chart.js"></script>
 <script>
     var currentUrl, currentBegin, currentEnd, serverStartTime;
+    currentUrl = 'charge/totalAmount/'; //默认查总充值金额
     var ctx = document.getElementById("myChart").getContext("2d");
 
     $('#date').delegate('a', 'click', function(event) {
-        var type = $(this).attr('class');
+        $('#date a').removeClass('selected');
+        $(this).addClass('selected');
+
+        var type = $(this).attr('data');
         switch (type) {
             case 'today':
                 var today = new Date();
@@ -103,7 +107,6 @@
             $('<li>').attr('data-url', aData.value).text(aData.label).appendTo('#functionList');
         }
 
-        currentUrl = 'charge/totalAmount/';
         $('#functionList').find('li[data-url="' + currentUrl + '"]').addClass('selected');
         fetchData(ctx, currentUrl, currentBegin, currentEnd);
     });
@@ -113,6 +116,7 @@
         currentEnd = end;
         fetchData(ctx, currentUrl, currentBegin, currentEnd);
     });
+
     $('#functionList').delegate('li', 'click', function(event) {
         $('#functionList li').removeClass('selected');
         $(this).addClass('selected');
@@ -171,6 +175,6 @@
         serverStartTime = data.serverStartTime;
         // currentBegin = serverStartTime;
         //默认取一周数据
-        $('#date a.last7').click();
+        $('#date [data="all"]').click();
     });
 </script>

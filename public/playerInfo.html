@@ -2,11 +2,24 @@
 <title></title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="stylesheets/jquery-ui.css">
 <style>
     #pageControle a {
         padding: 0 5px 0 5px;
     }
+    
+    .selected {
+        background: #ccc;
+    }
 </style>
+<div id="date">
+    Date: <input type="text" id="datepicker">
+    <a href="javascript:;" data="today">今日</a>
+    <a href="javascript:;" data="yestoday">昨日</a>
+    <a href="javascript:;" data="last7">近7日</a>
+    <a href="javascript:;" data="last30">近30日</a>
+    <a href="javascript:;" data="all">全部</a>
+</div>
 <table id="table">
     <tr>
         <td>序号</td>
@@ -16,43 +29,90 @@
     </tr>
 </table>
 <div id="pageControle">
-    <a href="javascript:;" class="first">首页</a><a href="javascript:;" class="prev">上一页</a><a href="javascript:;" class="next">下一页</a>
-    <!--<a href="javascript:;" class="last">尾页</a>-->
+    <a href="javascript:;" class="first">首页</a>
+    <a href="javascript:;" class="prev">上一页</a>
+    <a href="javascript:;" class="next">下一页</a>
+    <a href="javascript:;" class="last">尾页</a>
 </div>
 <script src="javascripts/jquery.js"></script>
+<script src="javascripts/jquery-ui.js"></script>
+<script src="javascripts/date.js"></script>
 <script>
+    var currentBegin, currentEnd, serverStartTime;
     var limit = 10, //页记录数
         currentIndex = 0, //当前页索引
         size = 0; //总记录数
-    var startDate = '2014-1-1',
-        endDate = '2017-5-30';
-    fetchData(0, 10, startDate, endDate);
+
+    $('#date').delegate('a', 'click', function(event) {
+        $('#date a').removeClass('selected');
+        $(this).addClass('selected');
+
+        var type = $(this).attr('data');
+        switch (type) {
+            case 'today':
+                var today = new Date();
+                currentBegin = currentEnd = formatDate(today);
+                break;
+            case 'yestoday':
+                var today = new Date();
+                currentEnd = formatDate(today);
+                today.setDate(today.getDate() - 1);
+                currentBegin = formatDate(today);
+                break;
+            case 'last7':
+                var today = new Date();
+                currentEnd = formatDate(today);
+                today.setDate(today.getDate() - 7);
+                currentBegin = formatDate(today);
+                break;
+            case 'last30':
+                var today = new Date();
+                currentEnd = formatDate(today);
+                today.setDate(today.getDate() - 30);
+                currentBegin = formatDate(today);
+                break;
+            case 'all':
+                currentBegin = serverStartTime;
+                var today = new Date();
+                currentEnd = formatDate(today);
+                break;
+            default:
+                break;
+        }
+        fetchData(currentIndex, limit, currentBegin, currentEnd);
+    });
+
+    mydate.select("#datepicker", function(begin, end) {
+        currentBegin = begin;
+        currentEnd = end;
+        fetchData(currentIndex, limit, currentBegin, currentEnd);
+    });
 
     $('#pageControle').delegate('a', 'click', function(event) {
         var type = $(this).attr('class');
         switch (type) {
             case 'first':
-                fetchData(0, limit, startDate, endDate);
+                fetchData(0, limit, currentBegin, currentEnd);
                 break;
             case 'prev':
                 currentIndex -= limit;
-                fetchData(currentIndex, limit, startDate, endDate);
+                fetchData(currentIndex, limit, currentBegin, currentEnd);
                 break;
             case 'next':
                 currentIndex += limit;
-                fetchData(currentIndex, limit, startDate, endDate);
+                fetchData(currentIndex, limit, currentBegin, currentEnd);
                 break;
             case 'last':
-                fetchData(size - limit, limit, startDate, endDate);
+                fetchData(size - limit, limit, currentBegin, currentEnd);
                 break;
             default:
                 break;
         }
     });
 
-    function fetchData(skip, limit, startDate, endDate) {
+    function fetchData(skip, limit, currentBegin, currentEnd) {
         $('#table tr.data').remove();
-        $.get('users/playerInfo/' + skip + '/' + limit + '/' + startDate + '/' + endDate + '', {}, function(data) {
+        $.get('users/playerInfo/' + skip + '/' + limit + '/' + currentBegin + '/' + currentEnd + '', {}, function(data) {
             size = data.size;
             for (var i = 0; i < data.data.length; i++) {
                 var aData = data.data[i];
@@ -65,4 +125,17 @@
             }
         });
     }
+
+    function formatDate(date) {
+        if (!date instanceof Date) return;
+        return date.toLocaleDateString('zh-CN').replace(/\//g, '-');
+    }
+
+    //默认日期
+    $.get('common/severStartTime', {}, function(data) {
+        console.log(data);
+        serverStartTime = data.serverStartTime;
+        //默认取所有数据
+        $('#date [data="all"]').click();
+    });
 </script>

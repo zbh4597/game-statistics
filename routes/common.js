@@ -37,7 +37,7 @@ router.get('/severStartTime', function(req, res, next) {
     var collection = db.collection('gameConfig');
     collection.findOne({}, {}, function(err, doc) {
         if (err) next(err);
-        res.json({ serverStartTime: utils.formatDate(new Date(doc.severStartTime)) });
+        res.json({ serverStartTime: utils.formatDate(new Date(doc.severStartTime * 1000)) });
     });
 });
 module.exports = router;
