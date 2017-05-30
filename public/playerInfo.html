@@ -2,4 +2,67 @@
 <title></title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="css/style.css" rel="stylesheet">
+<style>
+    #pageControle a {
+        padding: 0 5px 0 5px;
+    }
+</style>
+<table id="table">
+    <tr>
+        <td>序号</td>
+        <td>账号</td>
+        <td>充值金额</td>
+        <td>当前等级</td>
+    </tr>
+</table>
+<div id="pageControle">
+    <a href="javascript:;" class="first">首页</a><a href="javascript:;" class="prev">上一页</a><a href="javascript:;" class="next">下一页</a>
+    <!--<a href="javascript:;" class="last">尾页</a>-->
+</div>
+<script src="javascripts/jquery.js"></script>
+<script>
+    var limit = 10, //页记录数
+        currentIndex = 0, //当前页索引
+        size = 0; //总记录数
+    var startDate = '2014-1-1',
+        endDate = '2017-5-30';
+    fetchData(0, 10, startDate, endDate);
+
+    $('#pageControle').delegate('a', 'click', function(event) {
+        var type = $(this).attr('class');
+        switch (type) {
+            case 'first':
+                fetchData(0, limit, startDate, endDate);
+                break;
+            case 'prev':
+                currentIndex -= limit;
+                fetchData(currentIndex, limit, startDate, endDate);
+                break;
+            case 'next':
+                currentIndex += limit;
+                fetchData(currentIndex, limit, startDate, endDate);
+                break;
+            case 'last':
+                fetchData(size - limit, limit, startDate, endDate);
+                break;
+            default:
+                break;
+        }
+    });
+
+    function fetchData(skip, limit, startDate, endDate) {
+        $('#table tr.data').remove();
+        $.get('users/playerInfo/' + skip + '/' + limit + '/' + startDate + '/' + endDate + '', {}, function(data) {
+            size = data.size;
+            for (var i = 0; i < data.data.length; i++) {
+                var aData = data.data[i];
+                var tr = $('<tr class="data">');
+                $('<td>').text(i + 1).appendTo(tr);
+                $('<td>').text(aData.name).appendTo(tr);
+                $('<td>').text(aData.chargeTotal).appendTo(tr);
+                $('<td>').text(aData.level).appendTo(tr);
+                tr.appendTo('#table');
+            }
+        });
+    }
+</script>

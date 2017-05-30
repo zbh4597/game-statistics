@@ -48,15 +48,20 @@
 <script src="javascripts/date.js"></script>
 <script src="javascripts/Chart.js"></script>
 <script>
-    var currentUrl, currentBegin, currentEnd;
+    var currentUrl, currentBegin, currentEnd, serverStartTime;
 
     //默认日期
     $.get('common/severStartTime', {}, function(data) {
         console.log(data);
         serverStartTime = data.serverStartTime;
-        currentBegin = serverStartTime;
+        // currentBegin = serverStartTime;
     });
-    currentEnd = new Date().toLocaleDateString('zh-CN').replace(/\//g, '-');
+
+    //默认取一周数据
+    var today = new Date();
+    currentEnd = today.toLocaleDateString('zh-CN').replace(/\//g, '-');
+    today.setDate(today.getDate() - 7);
+    currentBegin = today.toLocaleDateString('zh-CN').replace(/\//g, '-');
 
     $.get('common/functionList', {}, function(data) {
         console.log(data);
