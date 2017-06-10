@@ -48,6 +48,7 @@
     <a href="javascript:;" data="last30">近30日</a>
     <a href="javascript:;" data="all">全部</a>
     <a href="playerInfo.html" target="_blank">玩家信息</a>
+    <a href="savedData.html" target="_blank">留存数据</a>
 </div>
 <div style="width:600px;height:300px">
     <canvas id="myChart" width="300" height="300"></canvas>
@@ -62,6 +63,7 @@
     var ctx = document.getElementById("myChart").getContext("2d");
 
     $('#date').delegate('a', 'click', function(event) {
+        if (!$(this).attr('data')) return;
         $('#date a').removeClass('selected');
         $(this).addClass('selected');
 

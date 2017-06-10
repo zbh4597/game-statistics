@@ -20,7 +20,7 @@ router.get('/newAdd/:startDate/:endDate', function(req, res, next) {
     });
 });
 
-router.get('/saved/:startDate/:endDate', function(req, res, next) {
+/*router.get('/saved/:startDate/:endDate', function(req, res, next) {
     var title = '用户留存';
 
     utils.doFetch(req, res, next, title, COLLECTION, function(startDateStr, tempDateStr) {
@@ -40,7 +40,7 @@ router.get('/saved/:startDate/:endDate', function(req, res, next) {
             { $count: "total" }
         ];
     });
-});
+});*/
 
 router.get('/playerInfo/:skip/:limit/:startDate/:endDate', function(req, res, next) {
     var title = '玩家信息';
@@ -129,5 +129,132 @@ router.get('/playerInfo/:skip/:limit/:startDate/:endDate', function(req, res, ne
     }
     setTimeout(checkFlag, 1000);
 });
+
+router.get('/saved/:date/:xday', function(req, res, next) {
+    var title = '用户留存';
+
+    var xday = +req.params['xday'],
+        date = req.params['date'].split('-');
+    var db = req.db,
+        collection = db.collection('dayLogin');
+
+    var year = +date[0],
+        month = +date[1],
+        day = +date[2];
+    var sum = 0,
+        sum2 = 0,
+        doneCount = 0;
+
+    var cursor = collection.find({ year: year, month: month, day: day });
+    cursor.toArray(function(err, docs) {
+        if (err) next(err);
+
+        sum = docs.length;
+
+        date = new Date(year, month - 1, day);
+        date.setDate(date.getDate() + xday);
+
+        year = date.getFullYear();
+        month = date.getMonth() + 1;
+        day = date.getDate();
+        for (var i = 0; i < sum; i++) {
+            var doc = docs[i];
+            var playerId = +doc.playerId;
+
+            cursor = collection.find({ playerId: playerId, year: year, month: month, day: day });
+
+            cursor.count(function(err, count) {
+                doneCount++;
+                sum2 += count;
+            });
+        }
+    });
+
+    var checkFlag = function() {
+        if (sum === doneCount) {
+            var savedPercent = 0;
+            if (sum != 0) {
+                savedPercent = sum2 / sum;
+            }
+            res.json({ savedPercent: (savedPercent * 100).toFixed(2) + '%' });
+        } else {
+            setTimeout(checkFlag, 1000);
+        }
+    }
+    setTimeout(checkFlag, 1000);
+});
+
+router.get('/saved2/:date/:xdays', function(req, res, next) {
+    var title = '用户留存';
+
+    var xdays = req.params['xdays'].split('-'),
+        date = req.params['date'].split('-');
+    var db = req.db,
+        collection = db.collection('dayLogin');
+
+    var year = +date[0],
+        month = +date[1],
+        day = +date[2];
+    var sum = 0,
+        sum2 = [],
+        doneCount = [];
+
+    var cursor = collection.find({ year: year, month: month, day: day });
+    cursor.toArray(function(err, docs) {
+        if (err) next(err);
+
+        sum = docs.length;
+        for (var i = 0; i < xdays.length; i++) {
+            doneCount[i] = 0;
+            sum2[i] = 0;
+
+            var xday = +xdays[i];
+            date = new Date(year, month - 1, day);
+            date.setDate(date.getDate() + xday);
+
+            var ayear = date.getFullYear();
+            var amonth = date.getMonth() + 1;
+            var aday = date.getDate();
+            for (var j = 0; j < sum; j++) {
+                var doc = docs[j];
+                var playerId = +doc.playerId;
+
+                cursor = collection.find({ playerId: playerId, year: ayear, month: amonth, day: aday });
+
+                cursor.count((function(i) {
+                    return function(err, count) {
+                        doneCount[i]++;
+                        sum2[i] += count;
+                    };
+                })(i));
+            }
+        }
+    });
+
+    var lastIndex = 0;
+    var checkFlag = function() {
+        for (var i = lastIndex; i < doneCount.length; i++, lastIndex++) {
+            if (sum !== doneCount[i]) {
+                break;
+            }
+        }
+        if (lastIndex === doneCount.length) {
+            var savedPercents = [];
+            for (var i = 0; i < sum2.length; i++) {
+                var savedPercent = 0;
+                if (sum != 0) {
+                    savedPercent = sum2[i] / sum;
+                }
+                savedPercents.push((savedPercent * 100).toFixed(2) + '%');
+            }
+
+            res.json(savedPercents);
+        } else {
+            setTimeout(checkFlag, 1000);
+        }
+    }
+    setTimeout(checkFlag, 1000);
+});
+
 
 module.exports = router;

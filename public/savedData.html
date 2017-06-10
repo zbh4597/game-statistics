@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<title></title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="stylesheets/jquery-ui.css">
+<div>
+    Date: <input type="text" id="datepicker">
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <td>注册日期</td>
+                <td>新增用户</td>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+<script src="javascripts/jquery.js"></script>
+<script src="javascripts/jquery-ui.js"></script>
+<script src="javascripts/date.js"></script>
+<script>
+    var currentBegin, currentEnd;
+    var dayArr = [1, 2, 3, 4, 5, 6, 7, 14, 30];
+    for (var i = 0; i < dayArr.length; i++) {
+        $('<td>').text(dayArr[i] + '日后').appendTo('#dataTable thead tr');
+    }
+
+    mydate.select("#datepicker", function(begin, end) {
+        currentBegin = begin;
+        currentEnd = end;
+        fetchData();
+    });
+
+    function fetchData() {
+        $.get('users/newAdd/' + currentBegin + '/' + currentEnd, {}, function(data) {
+            var labels = data.labels,
+                data = data.data;
+            for (var i = 0; i < labels.length; i++) {
+                var aLabel = labels[i],
+                    aData = data[i];
+                var tr = $('<tr>').attr('data', aLabel).append('<td>' + aLabel + '</td>').append('<td>' + aData + '</td>');
+                tr.appendTo('#dataTable tbody');
+
+                var xdays = dayArr.join('-');
+
+                $.get('users/saved2/' + aLabel + '/' + xdays, {}, (function(tr) {
+                    return function(data) {
+                        for (var i = 0; i < data.length; i++) {
+                            var savedPercent = data[i];
+                            $('<td>').text(savedPercent).appendTo(tr);
+                        }
+                    };
+                })(tr));
+
+                // for (var j = 0; j < dayArr.length; j++) {
+                //     var xday = dayArr[j];
+                //     $('<td>').attr('data', xday).appendTo(tr);
+                //     $.get('users/saved/' + aLabel + '/' + xday, {}, (function(aLabel, xday) {
+                //         return function(data) {
+                //             var savedPercent = data.savedPercent;
+                //             if (savedPercent === '0.00%') return;
+                //             $('tr[data="' + aLabel + '"] td[data="' + xday + '"]').text(savedPercent);
+                //         }
+                //     })(aLabel, xday));
+                // }
+
+            }
+        });
+    }
+
+    function formatDate(date) {
+        if (!date instanceof Date) return;
+        return date.toLocaleDateString('zh-CN').replace(/\//g, '-');
+    }
+</script>
