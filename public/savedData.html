@@ -29,6 +29,10 @@
     mydate.select("#datepicker", function(begin, end) {
         currentBegin = begin;
         currentEnd = end;
+        //清除数据
+        $('#dataTable tbody').remove();
+        $('<tbody>').appendTo('#dataTable');
+        //添加数据
         fetchData();
     });
 
