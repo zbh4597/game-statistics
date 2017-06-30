@@ -15,7 +15,7 @@ router.get('/newAdd/:startDate/:endDate', function(req, res, next) {
                     ]
                 }
             },
-            { $count: "total" }
+            { $group: { _id: "$playerId", total: { $sum: 1 } } }
         ];
     });
 });

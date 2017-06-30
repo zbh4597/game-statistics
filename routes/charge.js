@@ -49,7 +49,7 @@ router.get('/unfinishOrder/:startDate/:endDate', function(req, res, next) {
                     ]
                 }
             },
-            { $count: "total" }
+            { $group: { _id: "", total: { $sum: 1 } } }
         ];
     });
 });
@@ -67,8 +67,7 @@ router.get('/playerNum/:startDate/:endDate', function(req, res, next) {
                     ]
                 }
             },
-            { $group: { _id: "$playerId" } },
-            { $count: "total" }
+            { $group: { _id: "$playerId", total: { $sum: 1 } } }
         ];
     });
 });
@@ -86,7 +85,7 @@ router.get('/times/:startDate/:endDate', function(req, res, next) {
                     ]
                 }
             },
-            { $count: "total" }
+            { $group: { _id: "", total: { $sum: 1 } } }
         ];
     });
 });
@@ -105,8 +104,7 @@ router.get('/firstNum/:startDate/:endDate', function(req, res, next) {
                     ]
                 }
             },
-            { $group: { _id: "$playerId" } },
-            { $count: "total" }
+            { $group: { _id: "$playerId", total: { $sum: 1 } } }
         ];
     });
 });
