@@ -50,6 +50,10 @@
     <a href="playerInfo.html" target="_blank">玩家信息</a>
     <a href="savedData.html" target="_blank">留存数据</a>
 </div>
+<div>
+    代理:<select id="agent" name="agent">
+    </select>
+</div>
 <div style="width:600px;height:300px">
     <canvas id="myChart" width="300" height="300"></canvas>
 </div>
@@ -58,7 +62,7 @@
 <script src="javascripts/date.js"></script>
 <script src="javascripts/Chart.js"></script>
 <script>
-    var currentUrl, currentBegin, currentEnd, serverStartTime;
+    var currentUrl, currentBegin, currentEnd, serverStartTime, agent;
     currentUrl = 'charge/totalAmount/'; //默认查总充值金额
     var ctx = document.getElementById("myChart").getContext("2d");
 
@@ -113,6 +117,17 @@
         fetchData(ctx, currentUrl, currentBegin, currentEnd);
     });
 
+    //获取渠道代理
+    $.get('common/agents', {}, function(data) {
+        console.log(data);
+
+        $('#agent').append('<option value="">请选择</option>');
+
+        for (var i = 0; i < data.agents.length; i++) {
+            $('#agent').append('<option value=' + data.agents[i] + '>' + data.agents[i] + '</option>');
+        }
+    });
+
     mydate.select("#datepicker", function(begin, end) {
         currentBegin = begin;
         currentEnd = end;
@@ -126,10 +141,17 @@
         fetchData(ctx, currentUrl, currentBegin, currentEnd);
     });
 
-    function fetchData(ctx, url, begin, end) {
-        if (!url || !begin || !end) return; //TODO 获取开服时间，作为最小begin，或者1个月前为默认end。当前时间作为最大和默认end。
+    $('#agent').change(function() {
+        fetchData(ctx, currentUrl, currentBegin, currentEnd);
+    });
 
-        $.get(url + begin + '/' + end, {}, function(data) {
+    function fetchData(ctx, url, begin, end) {
+        if (!url || !begin || !end) return;
+
+        //获取渠道代理
+        var agent = $('#agent').val();
+
+        $.get(url + begin + '/' + end + '?agent=' + agent, {}, function(data) {
             console.log(data);
             var title = data.title;
             var data = {

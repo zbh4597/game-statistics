@@ -41,4 +41,14 @@ router.get('/severStartTime', function(req, res, next) {
         res.json({ serverStartTime: utils.formatDate(new Date(doc.severStartTime * 1000)) });
     });
 });
+
+router.get('/agents', function(req, res, next) {
+    var db = req.db;
+    var collection = db.collection('user');
+    collection.distinct('agent', function(err, doc) {
+        if (err) next(err);
+        res.json({ agents: doc });
+    });
+});
+
 module.exports = router;

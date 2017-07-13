@@ -7,16 +7,33 @@ router.get('/newAdd/:startDate/:endDate', function(req, res, next) {
     var title = '日新增用户数';
 
     utils.doFetch(req, res, next, title, COLLECTION, function(startDateStr, tempDateStr) {
-        return [{
-                $match: {
-                    $and: [
-                        { registerTime: { $gte: startDateStr } },
-                        { registerTime: { $lt: tempDateStr } }
-                    ]
-                }
-            },
-            { $group: { _id: "$playerId", total: { $sum: 1 } } }
-        ];
+        var agent = req.query['agent'];
+        var query;
+        if (agent) {
+            query = [{
+                    $match: {
+                        $and: [
+                            { agent: agent },
+                            { registerTime: { $gte: startDateStr } },
+                            { registerTime: { $lt: tempDateStr } }
+                        ]
+                    }
+                },
+                { $group: { _id: "$playerId", total: { $sum: 1 } } }
+            ];
+        } else {
+            query = [{
+                    $match: {
+                        $and: [
+                            { registerTime: { $gte: startDateStr } },
+                            { registerTime: { $lt: tempDateStr } }
+                        ]
+                    }
+                },
+                { $group: { _id: "$playerId", total: { $sum: 1 } } }
+            ];
+        }
+        return query;
     });
 });
 
