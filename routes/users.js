@@ -273,5 +273,21 @@ router.get('/saved2/:date/:xdays', function(req, res, next) {
     setTimeout(checkFlag, 1000);
 });
 
+router.get('/lev/:startZhuan/:endZhuan/:startLevel/:endLevel', function(req, res, next) {
+    var title = '等级统计';
+
+    utils.doFetch2(req, res, next, title, 'playerInfo', function(zhuan, level) {
+        return [{
+                $match: {
+                    $and: [
+                        { zhuan: zhuan },
+                        { level: level }
+                    ]
+                }
+            },
+            { $group: { _id: "", total: { $sum: 1 } } }
+        ];
+    });
+});
 
 module.exports = router;
