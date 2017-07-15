@@ -19,7 +19,7 @@ router.get('/newAdd/:startDate/:endDate', function(req, res, next) {
                         ]
                     }
                 },
-                { $group: { _id: "$playerId", total: { $sum: 1 } } }
+                { $count: "total" }
             ];
         } else {
             query = [{
@@ -30,7 +30,7 @@ router.get('/newAdd/:startDate/:endDate', function(req, res, next) {
                         ]
                     }
                 },
-                { $group: { _id: "$playerId", total: { $sum: 1 } } }
+                { $count: "total" }
             ];
         }
         return query;
@@ -285,7 +285,7 @@ router.get('/lev/:startZhuan/:endZhuan/:startLevel/:endLevel', function(req, res
                     ]
                 }
             },
-            { $group: { _id: "", total: { $sum: 1 } } }
+            { $count: "total" }
         ];
     });
 });

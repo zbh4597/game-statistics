@@ -86,7 +86,7 @@ router.get('/unfinishOrder/:startDate/:endDate', function(req, res, next) {
                         ]
                     }
                 },
-                { $group: { _id: "", total: { $sum: 1 } } }
+                { $count: "total" }
             ];
         } else {
             query = [{
@@ -98,7 +98,7 @@ router.get('/unfinishOrder/:startDate/:endDate', function(req, res, next) {
                         ]
                     }
                 },
-                { $group: { _id: "", total: { $sum: 1 } } }
+                { $count: "total" }
             ];
         }
         return query;
@@ -122,7 +122,8 @@ router.get('/playerNum/:startDate/:endDate', function(req, res, next) {
                         ]
                     }
                 },
-                { $group: { _id: "$playerId", total: { $sum: 1 } } }
+                { $group: { _id: "$playerId" } },
+                { $count: "total" }
             ];
         } else {
             query = [{
@@ -134,7 +135,8 @@ router.get('/playerNum/:startDate/:endDate', function(req, res, next) {
                         ]
                     }
                 },
-                { $group: { _id: "$playerId", total: { $sum: 1 } } }
+                { $group: { _id: "$playerId" } },
+                { $count: "total" }
             ];
         }
         return query;
@@ -158,7 +160,7 @@ router.get('/times/:startDate/:endDate', function(req, res, next) {
                         ]
                     }
                 },
-                { $group: { _id: "", total: { $sum: 1 } } }
+                { $count: "total" }
             ];
         } else {
             query = [{
@@ -170,7 +172,7 @@ router.get('/times/:startDate/:endDate', function(req, res, next) {
                         ]
                     }
                 },
-                { $group: { _id: "", total: { $sum: 1 } } }
+                { $count: "total" }
             ];
         }
         return query;
@@ -195,7 +197,8 @@ router.get('/firstNum/:startDate/:endDate', function(req, res, next) {
                         ]
                     }
                 },
-                { $group: { _id: "$playerId", total: { $sum: 1 } } }
+                { $group: { _id: "$playerId" } },
+                { $count: "total" }
             ];
         } else {
             query = [{
@@ -208,7 +211,8 @@ router.get('/firstNum/:startDate/:endDate', function(req, res, next) {
                         ]
                     }
                 },
-                { $group: { _id: "$playerId", total: { $sum: 1 } } }
+                { $group: { _id: "$playerId" } },
+                { $count: "total" }
             ];
         }
         return query;
