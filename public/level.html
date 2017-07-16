@@ -1,0 +1,106 @@
+<!doctype html>
+
+<meta charset="utf-8">
+<title>等级统计</title>
+
+<div>
+    <div>
+        转: <select id="startZhuan">
+	</select>-<select id="endZhuan">
+	</select>
+    </div>
+    <div>
+        等级: <select id="startLevel">
+	</select>-<select id="endLevel">
+	</select>
+    </div>
+</div>
+<div style="width:960px;height:300px">
+    <canvas id="myChart"></canvas>
+</div>
+
+<script src="javascripts/jquery.js"></script>
+<script src="javascripts/Chart.js"></script>
+<script>
+    var startZhuan = 0,
+        endZhuan = 0,
+        startLevel = 1,
+        endLevel = 70;
+    var ctx = document.getElementById("myChart").getContext("2d");
+
+
+
+    $('select').change(function() {
+        if ('startZhuan' === $(this).attr('id')) {
+            $('#endZhuan').val($('#startZhuan').val());
+        }
+        startZhuan = $('#startZhuan').val();
+        endZhuan = $('#endZhuan').val();
+
+        startLevel = $('#startLevel').val();
+        endLevel = $('#endLevel').val();
+
+        fetchData();
+    });
+
+    function fetchData() {
+        $.get('users/lev/' + startZhuan + '/' + endZhuan + '/' + startLevel + '/' + endLevel, {}, function(data) {
+            console.log(data);
+
+            var labels = data.labels.map(function(x) {
+                var level = x % 1000;
+                var zhuan = parseInt(x / 1000);
+                return zhuan + '转' + level + '级';
+            });
+
+            var title = data.title;
+            var data = {
+                labels: labels,
+                datasets: [{
+                    label: title,
+                    fillColor: "rgba(220,220,220,0.5)",
+                    strokeColor: "rgba(220,220,220,1)",
+                    pointColor: "rgba(220,220,220,1)",
+                    pointStrokeColor: "#fff",
+                    data: data.data
+                }]
+            }
+            var config = {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    title: {
+                        display: true,
+                        text: title
+                    },
+                    scales: {
+                        xAxes: [{
+                            display: true
+                        }],
+                        yAxes: [{
+                            display: true
+                        }]
+                    }
+                }
+            };
+            new Chart(ctx, config);
+        });
+    }
+
+    //初始化select数据
+    for (var i = 0; i < 12; i++) {
+        $('<option>').val(i).text(i).appendTo('#startZhuan');
+        $('<option>').val(i).text(i).appendTo('#endZhuan');
+    }
+    for (var i = 0; i < 70; i++) {
+        $('<option>').val(i + 1).text(i + 1).appendTo('#startLevel');
+        $('<option>').val(i + 1).text(i + 1).appendTo('#endLevel');
+    }
+
+    $('#startZhuan').val(0);
+    $('#startLevel').val(1);
+    $('#endLevel').val(70);
+
+    fetchData();
+</script>
