@@ -35,40 +35,6 @@ router.get('/totalAmount/:startDate/:endDate', function(req, res, next) {
     });
 });
 
-router.get('/agent/:agent/:startDate/:endDate', function(req, res, next) {
-    var title = '指定平台充值额';
-
-    utils.doFetch(req, res, next, title, COLLECTION, function(startDateStr, tempDateStr) {
-        var agent = req.query['agent'];
-        var query;
-        if (agent) {
-            query = [{
-                $match: {
-                    $and: [
-                        { state: 1 },
-                        { agent: agent },
-                        { agent: req.params['agent'] },
-                        { time: { $gte: startDateStr } },
-                        { time: { $lt: tempDateStr } }
-                    ]
-                }
-            }, { $group: { _id: "", total: { $sum: "$yuan" } } }];
-        } else {
-            query = [{
-                $match: {
-                    $and: [
-                        { state: 1 },
-                        { agent: req.params['agent'] },
-                        { time: { $gte: startDateStr } },
-                        { time: { $lt: tempDateStr } }
-                    ]
-                }
-            }, { $group: { _id: "", total: { $sum: "$yuan" } } }];
-        }
-        return query;
-    });
-});
-
 router.get('/unfinishOrder/:startDate/:endDate', function(req, res, next) {
     var title = '未完成订单数';
 

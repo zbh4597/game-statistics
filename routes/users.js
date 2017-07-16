@@ -37,28 +37,6 @@ router.get('/newAdd/:startDate/:endDate', function(req, res, next) {
     });
 });
 
-/*router.get('/saved/:startDate/:endDate', function(req, res, next) {
-    var title = '用户留存';
-
-    utils.doFetch(req, res, next, title, COLLECTION, function(startDateStr, tempDateStr) {
-        var startDate = new Date(startDateStr);
-        startDate.setDate(startDate.getDate() - 1);
-        var lastDateOfStartStr = startDate.toLocaleDateString('zh-CN').replace(/\//g, '-');
-        return [{
-                $match: {
-                    $and: [
-                        { registerTime: { $gte: lastDateOfStartStr } },
-                        { registerTime: { $lt: startDateStr } },
-                        { lastTime: { $gte: startDateStr } },
-                        { lastTime: { $lt: tempDateStr } }
-                    ]
-                }
-            },
-            { $count: "total" }
-        ];
-    });
-});*/
-
 router.get('/playerInfo/:skip/:limit/:startDate/:endDate', function(req, res, next) {
     var title = '玩家信息';
 

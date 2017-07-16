@@ -22,14 +22,6 @@ router.get('/functionList', function(req, res, next) {
         value: 'users/newAdd/',
         label: '日新增用户数'
     }]);
-    // {
-    //     value: 'charge/agent/',
-    //     label: '指定平台充值额'
-    // }TODO 需要进一步处理
-    // , {
-    //     value: 'users/saved/',
-    //     label: '用户留存'
-    // }
 });
 
 //获取开服日期
